@@ -4,7 +4,7 @@
   "description": "Adobe Premiere Pro plugin for detecting and removing duplicate video segments",
   "main": "index.js",
   "scripts": {
-    "build": "mkdir -p dist && cp -r src/* dist/",
+    "build": "node scripts/build.js",
     "package": "npm run build && cd dist && zip -r ../duplicate-detector.zxp .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
