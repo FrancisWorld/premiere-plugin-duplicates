@@ -239,12 +239,16 @@ function restoreDefaultSettings() {
 function updateSimilarityThresholdLabel() {
   const value = $('#similarityThreshold').val();
   $('#similarityThreshold').closest('.slider-container').find('.slider-value').text(value + '%');
+  // Update settings object with new value
+  settings.similarityThreshold = parseInt(value);
 }
 
 // Update minimum duration label
 function updateMinDurationLabel() {
   const value = $('#minDuration').val();
   $('#minDuration').closest('.slider-container').find('.slider-value').text(value + 's');
+  // Update settings object with new value
+  settings.minDuration = parseFloat(value);
 }
 
 // Show settings section
@@ -330,10 +334,10 @@ function showNotification(message, type = 'success') {
 // Analyze sequence for duplicates
 function analyzeSequence() {
   try {
-    // Get analysis options from UI
+    // Get analysis options from UI - use current settings values directly
     const options = {
-      similarityThreshold: parseInt($('#similarityThreshold').val()),
-      minDuration: parseFloat($('#minDuration').val()),
+      similarityThreshold: settings.similarityThreshold,
+      minDuration: settings.minDuration,
       useHistogramComparison: $('#useHistogram').is(':checked'),
       useMotionTracking: $('#useMotion').is(':checked'),
       useAudioAnalysis: $('#useAudio').is(':checked'),
@@ -347,12 +351,18 @@ function analyzeSequence() {
     
     // Call JSX function to analyze sequence
     console.log("Calling analyzeDuplicates with options:", options);
-    const optionsString = JSON.stringify(options).replace(/"/g, '\\"');
-    csInterface.evalScript(`analyzeDuplicates("${optionsString}")`, function(result) {
+    
+    // Properly stringify the options for JSX
+    const optionsString = JSON.stringify(options);
+    
+    // Call the JSX function using evalScript
+    csInterface.evalScript(`analyzeDuplicates('${optionsString}')`, function(result) {
       if (result === 'false' || result === false) {
         console.error("Analysis failed on JSX side");
         hideLoading();
         showNotification('Error analyzing sequence', 'error');
+      } else {
+        console.log("Analysis successful, waiting for analysisComplete event");
       }
     });
   } catch (error) {

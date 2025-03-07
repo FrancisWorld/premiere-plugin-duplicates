@@ -124,12 +124,22 @@ function analyzeDuplicates(optionsString) {
     // Parse options from string if it's a string
     var options;
     if (typeof optionsString === 'string') {
-      options = JSON.parse(optionsString);
+      // Try to properly parse the JSON string, handling escaping
+      try {
+        options = JSON.parse(optionsString);
+      } catch (parseError) {
+        // If that fails, try to eval it as an object
+        // This is a fallback for string formatting issues
+        options = eval('(' + optionsString + ')');
+      }
     } else if (optionsString) {
       options = optionsString;
     } else {
       options = settings;
     }
+    
+    // Log parsed options for debugging
+    $.writeln("Analysis options: " + JSON.stringify(options));
     
     // Notify UI that analysis has started
     cs.evalScript("window.dispatchEvent(new CustomEvent('analysisStarted'));");
@@ -164,13 +174,15 @@ function analyzeDuplicates(optionsString) {
     // Store the results
     duplicateSegments = potentialDuplicates;
     
-    // Send results to UI
-    cs.evalScript("window.dispatchEvent(new CustomEvent('analysisComplete', { detail: " + JSON.stringify(duplicateSegments) + " }));");
+    // Send results to UI with proper JSON escaping
+    var resultsJSON = JSON.stringify(duplicateSegments).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    cs.evalScript('window.dispatchEvent(new CustomEvent("analysisComplete", { detail: JSON.parse("' + resultsJSON + '") }));');
     
     return true;
   } catch (e) {
     console.error("Error analyzing duplicates: " + e.message);
-    cs.evalScript("window.dispatchEvent(new CustomEvent('analysisError', { detail: '" + e.message + "' }));");
+    var errorMsg = e.message.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/'/g, "\\'");
+    cs.evalScript("window.dispatchEvent(new CustomEvent('analysisError', { detail: '" + errorMsg + "' }));");
     return false;
   }
 }

@@ -73,7 +73,7 @@ Duplicate Detector is a high-efficiency Adobe Premiere Pro plugin that automatic
 
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/duplicate-detector.git
+   git clone https://github.com/FrancisWorld/premiere-plugin-duplicates.git
    ```
 2. Install dependencies
    ```
