@@ -1,0 +1,28 @@
+{
+  "name": "duplicate-detector",
+  "version": "1.0.0",
+  "description": "Adobe Premiere Pro plugin for detecting and removing duplicate video segments",
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r src/* dist/",
+    "package": "npm run build && cd dist && zip -r ../duplicate-detector.zxp .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "adobe",
+    "premiere",
+    "plugin",
+    "extension",
+    "video",
+    "duplicate",
+    "detection"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^3.6.0"
+  },
+  "devDependencies": {
+    "zxp-sign-cmd": "^1.0.0"
+  }
+}

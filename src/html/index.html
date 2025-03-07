@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duplicate Detector</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../lib/CSInterface.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Duplicate Detector</h1>
+      <div class="header-controls">
+        <button id="settingsBtn" class="icon-button" title="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <button id="helpBtn" class="icon-button" title="Help">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </button>
+      </div>
+    </header>
+    
+    <main>
+      <section id="analyzeSection" class="active-section">
+        <div class="control-panel">
+          <h2>Analyze Sequence</h2>
+          <p>Scan your sequence for duplicate segments based on visual and audio similarity.</p>
+          
+          <div class="settings-panel">
+            <div class="setting-group">
+              <label for="similarityThreshold">Similarity Threshold (%)</label>
+              <div class="slider-container">
+                <input type="range" id="similarityThreshold" min="50" max="100" value="90" step="1">
+                <span class="slider-value">90%</span>
+              </div>
+            </div>
+            
+            <div class="setting-group">
+              <label for="minDuration">Minimum Duration (seconds)</label>
+              <div class="slider-container">
+                <input type="range" id="minDuration" min="0.5" max="10" value="2" step="0.5">
+                <span class="slider-value">2s</span>
+              </div>
+            </div>
+            
+            <div class="setting-group">
+              <div class="checkbox-group">
+                <input type="checkbox" id="useHistogram" checked>
+                <label for="useHistogram">Use Histogram Comparison</label>
+              </div>
+              
+              <div class="checkbox-group">
+                <input type="checkbox" id="useMotion" checked>
+                <label for="useMotion">Use Motion Tracking</label>
+              </div>
+              
+              <div class="checkbox-group">
+                <input type="checkbox" id="useAudio" checked>
+                <label for="useAudio">Use Audio Analysis</label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="button-row">
+            <button id="analyzeBtn" class="primary-button">Analyze Sequence</button>
+          </div>
+        </div>
+      </section>
+      
+      <section id="resultsSection" class="hidden-section">
+        <div class="results-header">
+          <h2>Potential Duplicates <span id="duplicateCount">(0)</span></h2>
+          <div class="results-controls">
+            <button id="backToAnalyzeBtn" class="text-button">Back to Analyze</button>
+            <button id="exportBtn" class="secondary-button">Export Results</button>
+          </div>
+        </div>
+        
+        <div class="results-content">
+          <div id="timelineContainer" class="timeline-container">
+            <div class="timeline-ruler"></div>
+            <div id="timelineItems" class="timeline-items"></div>
+          </div>
+          
+          <div id="duplicatesList" class="duplicates-list">
+            <!-- Duplicate items will be dynamically added here -->
+            <div class="empty-state">
+              <p>No duplicates found. Try adjusting the similarity threshold or analysis methods.</p>
+            </div>
+          </div>
+          
+          <div class="preview-panel">
+            <div class="preview-header">
+              <h3>Preview</h3>
+              <div class="preview-controls">
+                <button id="toggleSyncBtn" class="icon-button" title="Toggle Sync Preview">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="preview-container">
+              <div class="preview-pair">
+                <div id="previewOriginal" class="preview-item">
+                  <div class="preview-placeholder">Original Clip</div>
+                </div>
+                <div id="previewDuplicate" class="preview-item">
+                  <div class="preview-placeholder">Duplicate Clip</div>
+                </div>
+              </div>
+              <div class="preview-controls">
+                <button id="playPauseBtn" class="icon-button" title="Play/Pause">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+                <div class="similarity-badge">
+                  <span id="similarityValue">95%</span> similar
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-panel">
+          <div class="action-info">
+            <p><span id="selectedCount">0</span> duplicates selected</p>
+          </div>
+          <div class="action-buttons">
+            <button id="selectAllBtn" class="secondary-button">Select All</button>
+            <button id="removeSelectedBtn" class="primary-button" disabled>Remove Selected</button>
+          </div>
+        </div>
+      </section>
+      
+      <section id="settingsSection" class="hidden-section">
+        <div class="section-header">
+          <h2>Settings</h2>
+          <button id="closeSettingsBtn" class="icon-button" title="Close Settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        
+        <div class="settings-content">
+          <div class="settings-group">
+            <h3>Analysis Settings</h3>
+            
+            <div class="setting-item">
+              <label for="gpuAcceleration">Use GPU Acceleration</label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="gpuAcceleration" checked>
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <label for="ignoreTagged">Ignore Tagged Clips</label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="ignoreTagged" checked>
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <label for="analysisMode">Analysis Mode</label>
+              <select id="analysisMode">
+                <option value="balanced">Balanced (Recommended)</option>
+                <option value="speed">Speed Optimized</option>
+                <option value="accuracy">Accuracy Optimized</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="settings-group">
+            <h3>Export Settings</h3>
+            
+            <div class="setting-item">
+              <label for="preserveQuality">Preserve Original Quality</label>
+              <div class="toggle-switch">
+                <input type="checkbox" id="preserveQuality" checked>
+                <span class="toggle-slider"></span>
+              </div>
+            </div>
+            
+            <div class="setting-item">
+              <label for="exportPreset">Export Preset</label>
+              <select id="exportPreset">
+                <option value="match">Match Sequence Settings</option>
+                <option value="h264">H.264</option>
+                <option value="prores">ProRes 422</option>
+                <option value="dnxhd">DNxHD</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="settings-group">
+            <h3>Interface Settings</h3>
+            
+            <div class="setting-item">
+              <label for="theme">Theme</label>
+              <select id="theme">
+                <option value="auto">Match Premiere Pro</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            
+            <div class="setting-item">
+              <label for="previewQuality">Preview Quality</label>
+              <select id="previewQuality">
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="settings-actions">
+          <button id="restoreDefaultsBtn" class="secondary-button">Restore Defaults</button>
+          <button id="saveSettingsBtn" class="primary-button">Save Settings</button>
+        </div>
+      </section>
+      
+      <section id="helpSection" class="hidden-section">
+        <div class="section-header">
+          <h2>Help</h2>
+          <button id="closeHelpBtn" class="icon-button" title="Close Help">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        
+        <div class="help-content">
+          <div class="help-section">
+            <h3>Getting Started</h3>
+            <p>Duplicate Detector helps you identify and remove repeated segments in your video projects. Follow these steps:</p>
+            <ol>
+              <li>Select a sequence in your Premiere Pro project</li>
+              <li>Set your similarity threshold and detection options</li>
+              <li>Click "Analyze Sequence" to scan for duplicates</li>
+              <li>Review the detected duplicates in the results panel</li>
+              <li>Select which duplicates to remove</li>
+              <li>Click "Remove Selected" to clean up your sequence</li>
+            </ol>
+          </div>
+          
+          <div class="help-section">
+            <h3>Analysis Settings</h3>
+            <p><strong>Similarity Threshold:</strong> Adjust how precise the matching should be. Higher values require clips to be more similar to be considered duplicates.</p>
+            <p><strong>Minimum Duration:</strong> Sets the shortest duration to consider as a duplicate (in seconds).</p>
+            <p><strong>Analysis Methods:</strong> Choose which techniques to use:</p>
+            <ul>
+              <li><strong>Histogram Comparison:</strong> Analyzes color distribution (fast but less accurate)</li>
+              <li><strong>Motion Tracking:</strong> Detects similar movement patterns (balanced performance)</li>
+              <li><strong>Audio Analysis:</strong> Compares audio waveforms for similar patterns (improves accuracy)</li>
+            </ul>
+          </div>
+          
+          <div class="help-section">
+            <h3>Performance Tips</h3>
+            <ul>
+              <li>Enable GPU acceleration in Settings for faster processing</li>
+              <li>For large projects, analyze smaller segments at a time</li>
+              <li>Lower the preview quality in Settings to improve interface responsiveness</li>
+              <li>Close other CPU/GPU-intensive applications when analyzing long sequences</li>
+            </ul>
+          </div>
+          
+          <div class="help-section">
+            <h3>Support</h3>
+            <p>For additional help or to report issues, contact support at: <a href="mailto:support@duplicatedetector.com">support@duplicatedetector.com</a></p>
+            <p>Version 1.0.0</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-spinner"></div>
+      <p id="loadingMessage">Analyzing sequence...</p>
+    </div>
+  </div>
+  
+  <script src="../js/libs/jquery.min.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>
