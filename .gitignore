@@ -1,0 +1,106 @@
+# Dependências
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+
+# Arquivos de build
+dist/
+build/
+*.zxp
+*.zip
+
+# Arquivos temporários
+.DS_Store
+Thumbs.db
+.cache/
+.temp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos de IDE e editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Arquivos específicos do Adobe CEP
+.debug
+debug.log
+
+# Arquivos de certificado
+*.p12
+*.pem
+*.cert
+*.key
+
+# Arquivos de configuração local
+config.local.js
+config.dev.js
+
+# Arquivos de teste
+coverage/
+.nyc_output/
+
+# Arquivos específicos do macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Arquivos específicos do Windows
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Arquivos específicos do Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Arquivos de backup do Adobe
+*.autosave
+*.idlk

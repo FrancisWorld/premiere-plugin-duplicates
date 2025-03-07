@@ -2,8 +2,8 @@
  * Cross-platform build script for Duplicate Detector extension
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Create dist directory if it doesn't exist
 const distDir = path.join(__dirname, '..', 'dist');
@@ -21,7 +21,7 @@ function copyFile(source, destination) {
   if (!fs.existsSync(destDir)) {
     fs.mkdirSync(destDir, { recursive: true });
   }
-  
+
   fs.copyFileSync(source, destination);
 }
 
@@ -33,15 +33,15 @@ function copyDir(source, destination) {
   if (!fs.existsSync(destination)) {
     fs.mkdirSync(destination, { recursive: true });
   }
-  
+
   // Get all files and directories in the source
   const entries = fs.readdirSync(source, { withFileTypes: true });
-  
+
   // Process each entry
   for (const entry of entries) {
     const sourcePath = path.join(source, entry.name);
     const destPath = path.join(destination, entry.name);
-    
+
     if (entry.isDirectory()) {
       // Recursively copy directory
       copyDir(sourcePath, destPath);
