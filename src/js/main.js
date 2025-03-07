@@ -81,9 +81,27 @@ function registerEventListeners() {
   $('#closeHelpBtn').on('click', hideHelp);
   $('#backToAnalyzeBtn').on('click', showAnalyzeSection);
   
-  // Analysis controls
-  $('#similarityThreshold').on('input', updateSimilarityThresholdLabel);
-  $('#minDuration').on('input', updateMinDurationLabel);
+  // Analysis controls - use 'change' event to update the model and 'input' for live UI updates
+  $('#similarityThreshold').on('input', function() {
+    const value = $(this).val();
+    $(this).closest('.slider-container').find('.slider-value').text(value + '%');
+  });
+  
+  $('#similarityThreshold').on('change', function() {
+    settings.similarityThreshold = parseInt($(this).val());
+    console.log("Similarity threshold updated:", settings.similarityThreshold);
+  });
+  
+  $('#minDuration').on('input', function() {
+    const value = $(this).val();
+    $(this).closest('.slider-container').find('.slider-value').text(value + 's');
+  });
+  
+  $('#minDuration').on('change', function() {
+    settings.minDuration = parseFloat($(this).val());
+    console.log("Min duration updated:", settings.minDuration);
+  });
+  
   $('#analyzeBtn').on('click', analyzeSequence);
   
   // Results actions
@@ -235,20 +253,16 @@ function restoreDefaultSettings() {
   showNotification('Default settings restored');
 }
 
-// Update similarity threshold label
+// Update similarity threshold label - used only for initialization and settings load
 function updateSimilarityThresholdLabel() {
   const value = $('#similarityThreshold').val();
   $('#similarityThreshold').closest('.slider-container').find('.slider-value').text(value + '%');
-  // Update settings object with new value
-  settings.similarityThreshold = parseInt(value);
 }
 
-// Update minimum duration label
+// Update minimum duration label - used only for initialization and settings load
 function updateMinDurationLabel() {
   const value = $('#minDuration').val();
   $('#minDuration').closest('.slider-container').find('.slider-value').text(value + 's');
-  // Update settings object with new value
-  settings.minDuration = parseFloat(value);
 }
 
 // Show settings section
@@ -334,13 +348,29 @@ function showNotification(message, type = 'success') {
 // Analyze sequence for duplicates
 function analyzeSequence() {
   try {
-    // Get analysis options from UI - use current settings values directly
+    console.log("Analyze button clicked");
+    
+    // Get current values from UI elements directly to ensure they're up to date
+    const similarityThreshold = parseInt($('#similarityThreshold').val());
+    const minDuration = parseFloat($('#minDuration').val());
+    const useHistogram = $('#useHistogram').is(':checked');
+    const useMotion = $('#useMotion').is(':checked');
+    const useAudio = $('#useAudio').is(':checked');
+    
+    // Update settings object to match current UI state
+    settings.similarityThreshold = similarityThreshold;
+    settings.minDuration = minDuration;
+    settings.useHistogramComparison = useHistogram;
+    settings.useMotionTracking = useMotion;
+    settings.useAudioAnalysis = useAudio;
+    
+    // Create a clean options object
     const options = {
-      similarityThreshold: settings.similarityThreshold,
-      minDuration: settings.minDuration,
-      useHistogramComparison: $('#useHistogram').is(':checked'),
-      useMotionTracking: $('#useMotion').is(':checked'),
-      useAudioAnalysis: $('#useAudio').is(':checked'),
+      similarityThreshold: similarityThreshold,
+      minDuration: minDuration,
+      useHistogramComparison: useHistogram,
+      useMotionTracking: useMotion,
+      useAudioAnalysis: useAudio,
       gpuAcceleration: settings.gpuAcceleration,
       ignoreTaggedClips: settings.ignoreTaggedClips,
       analysisMode: settings.analysisMode
@@ -349,20 +379,23 @@ function analyzeSequence() {
     // Show loading overlay
     showLoading('Analyzing sequence...');
     
-    // Call JSX function to analyze sequence
-    console.log("Calling analyzeDuplicates with options:", options);
+    // Log the options for debugging
+    console.log("Analysis options:", options);
     
-    // Properly stringify the options for JSX
-    const optionsString = JSON.stringify(options);
+    // Create a simple string parameter to avoid JSON parsing issues
+    const simpleParam = `${similarityThreshold},${minDuration},${useHistogram},${useMotion},${useAudio}`;
+    console.log("Using simple parameter string:", simpleParam);
     
-    // Call the JSX function using evalScript
-    csInterface.evalScript(`analyzeDuplicates('${optionsString}')`, function(result) {
+    // Call the JSX function with a simple parameter string
+    csInterface.evalScript(`analyzeWithParams(${similarityThreshold}, ${minDuration}, ${useHistogram}, ${useMotion}, ${useAudio})`, function(result) {
+      console.log("Result from JSX:", result);
+      
       if (result === 'false' || result === false) {
         console.error("Analysis failed on JSX side");
         hideLoading();
         showNotification('Error analyzing sequence', 'error');
       } else {
-        console.log("Analysis successful, waiting for analysisComplete event");
+        console.log("Analysis initiated, waiting for analysisComplete event");
       }
     });
   } catch (error) {
