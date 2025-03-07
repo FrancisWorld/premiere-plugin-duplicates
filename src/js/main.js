@@ -39,6 +39,10 @@ function initCSInterface() {
     
     // Add event listener for theme color changes
     csInterface.addEventListener(CSInterface.THEME_COLOR_CHANGED_EVENT, updateThemeColors);
+
+    // Initialize slider values
+    updateSimilarityThresholdLabel();
+    updateMinDurationLabel();
   } catch (error) {
     console.error("Error initializing CS Interface:", error);
   }
@@ -234,13 +238,13 @@ function restoreDefaultSettings() {
 // Update similarity threshold label
 function updateSimilarityThresholdLabel() {
   const value = $('#similarityThreshold').val();
-  $('#similarityThreshold').siblings('.slider-value').text(value + '%');
+  $('#similarityThreshold').closest('.slider-container').find('.slider-value').text(value + '%');
 }
 
 // Update minimum duration label
 function updateMinDurationLabel() {
   const value = $('#minDuration').val();
-  $('#minDuration').siblings('.slider-value').text(value + 's');
+  $('#minDuration').closest('.slider-container').find('.slider-value').text(value + 's');
 }
 
 // Show settings section
@@ -342,7 +346,15 @@ function analyzeSequence() {
     showLoading('Analyzing sequence...');
     
     // Call JSX function to analyze sequence
-    csInterface.evalScript(`analyzeDuplicates(${JSON.stringify(options)})`);
+    console.log("Calling analyzeDuplicates with options:", options);
+    const optionsString = JSON.stringify(options).replace(/"/g, '\\"');
+    csInterface.evalScript(`analyzeDuplicates("${optionsString}")`, function(result) {
+      if (result === 'false' || result === false) {
+        console.error("Analysis failed on JSX side");
+        hideLoading();
+        showNotification('Error analyzing sequence', 'error');
+      }
+    });
   } catch (error) {
     console.error("Error analyzing sequence:", error);
     hideLoading();
